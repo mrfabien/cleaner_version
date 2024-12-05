@@ -28,7 +28,7 @@ def to_pca_components(path, variables, seed_number, threshold=0.98):
 
     print("Storm indices for training:", storm_index_training)
     print("Storm indices for test:", storm_index_test)
-    print("Storm indices for validiation:", storm_index_validation)
+    print("Storm indices for validation:", storm_index_validation)
 
     # Data is stored by statistics
     stats = ['max','min','mean','std']
@@ -108,15 +108,15 @@ def to_pca_components(path, variables, seed_number, threshold=0.98):
             # what we keep for the input of ML model is the scores_98
             scores_threshold = pd.DataFrame(scores_threshold)
             scores_threshold.rename(columns=lambda x: 'PCA_'+str(x+1), inplace=True)
-            scores_threshold.to_csv(f'/data/PCA_scores/training_{var_name}.csv')
+            scores_threshold.to_csv(f'{path}/data/PCA_scores/training_{var_name}.csv')
 
             scores_threshold_test = pd.DataFrame(scores_threshold_test)
             scores_threshold_test.rename(columns=lambda x: 'PCA_'+str(x+1), inplace=True)
-            scores_threshold_test.to_csv(f'/data/PCA_scores/test_{var_name}.csv')
+            scores_threshold_test.to_csv(f'{path}/data/PCA_scores/test_{var_name}.csv')
 
             scores_threshold_validation = pd.DataFrame(scores_threshold_validation)
             scores_threshold_validation.rename(columns=lambda x: 'PCA_'+str(x+1), inplace=True)
-            scores_threshold_validation.to_csv(f'/data/PCA_scores/validation_{var_name}.csv')
+            scores_threshold_validation.to_csv(f'{path}/data/PCA_scores/validation_{var_name}.csv')
 
             print(f'PCA scores for {var_name} have been saved')
 '''
