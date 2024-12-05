@@ -49,6 +49,8 @@ def split_storm_numbers(storm_numbers, test_valid_percentage, seed_number):
     random.seed(seed_number)
 
     test_index_fixed = [6,29,38,45,48,66,86,87,93]
+    # remove 1 to have the index of the storms
+    test_index_fixed = [x-1 for x in test_index_fixed]
 
     filtered_numbers = [x for x in storm_numbers if x not in test_index_fixed]
 
