@@ -178,3 +178,54 @@ def process_storm_data(y_all_3d, y_all_3d_non_eu, number_of_steps_eu, number_of_
         print(f'EU dataset is 1st step in EU first, and non-EU dataset landfall step is 1st (meaning the step {number_of_steps_non_eu} hours before landfall is last).')
     
     return eu_results[0], eu_results [1], eu_results[2], eu_results[3], non_eu_results[0], non_eu_results[1], non_eu_results[2], non_eu_results[3]
+
+def tif_to_dataframe(tif_file, date_climatology, band=1):
+    """
+    Converts a .tif file into a Pandas DataFrame with wind speed values, longitude, and latitude.
+
+    Parameters:
+    - tif_file (str): Path to the .tif file.
+    - band (int): The band number to read from the .tif file (default is 1).
+    
+    Returns:
+    - DataFrame: A Pandas DataFrame with columns ['wind_speed', 'longitude', 'latitude'].
+    """
+    try:
+        # Open the .tif file
+        with rasterio.open(tif_file) as dataset:
+            # Read the specified band
+            data = dataset.read(band)  
+            
+            # Get the affine transformation
+            transform = dataset.transform
+            
+            # No-data value
+            nodata_value = dataset.nodata
+
+        # Create a list to store data
+        data_list = []
+
+        # Loop through each pixel
+        for row in range(data.shape[0]):
+            for col in range(data.shape[1]):
+                # Get the wind speed value
+                value = data[row, col]
+                
+                # Skip if it's a no-data value
+                if value == nodata_value or value is None:
+                    continue
+                
+                # Get the coordinates for this pixel
+                x, y = rasterio.transform.xy(transform, row, col, offset='center')
+                
+                # Append the value and coordinates
+                data_list.append({f'wind_speed_{date_climatology}': value, 'longitude': x, 'latitude': y})
+
+        # Convert the list into a DataFrame
+        df = pd.DataFrame(data_list)
+        
+        return df
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
