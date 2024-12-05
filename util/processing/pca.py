@@ -12,6 +12,8 @@ def to_pca_components(path, variables, seed_number, threshold=0.98):
     # Get the storm indices from a non-EU dataset
     x_storms = pd.read_csv(f'{path}/data/time_series_1h_non_EU/instantaneous_10m_wind_gust/instantaneous_10m_wind_gust_max.csv')
     index_storm_EU = x_storms['storm_index'].copy()
+    # reduce by 1 to match the index of the storm in the EU dataset
+    index_storm_EU = index_storm_EU - 1
 
     # Split the storm indices into training, test and validation based on the storm index
     storm_index_training, storm_index_test, storm_index_validation = extraction_squares.split_storm_numbers(index_storm_EU, 0.15, seed_number)
@@ -29,6 +31,11 @@ def to_pca_components(path, variables, seed_number, threshold=0.98):
     print("Storm indices for training:", storm_index_training)
     print("Storm indices for test:", storm_index_test)
     print("Storm indices for validation:", storm_index_validation)
+
+    # add 1 to the storm index to match the index of the storm in the timeseries dataset
+    storm_index_training = [x+1 for x in storm_index_training]
+    storm_index_test = [x+1 for x in storm_index_test]
+    storm_index_validation = [x+1 for x in storm_index_validation]
 
     # Data is stored by statistics
     stats = ['max','min','mean','std']
