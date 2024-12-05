@@ -45,8 +45,10 @@ relative_humidity_925
 relative_humidity_950
 relative_humidity_975
 relative_humidity_1000
+sea_surface_temperature
 surface_pressure
 surface_latent_heat_flux
+surface_sensible_heat_flux
 specific_rain_water_content_10
 specific_rain_water_content_20
 specific_rain_water_content_30

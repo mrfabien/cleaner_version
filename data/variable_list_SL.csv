@@ -24,6 +24,7 @@ mean_surface_net_long_wave_radiation_flux
 mean_surface_net_short_wave_radiation_flux
 mean_vertically_integrated_moisture_divergence
 relative_humidity
+sea_surface_temperature
 surface_pressure
 surface_latent_heat_flux
 surface_sensible_heat_flux

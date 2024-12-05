@@ -90,6 +90,8 @@ def process_data(variable, year, level=0):
 
     if variable == 'geopotential':
         way = '/work/FAC/FGSE/IDYST/tbeucler/default/raw_data/ECMWF/ERA5_hourly_PL/'
+    elif variable == 'sea_surface_temperature':
+        way = '/work/FAC/FGSE/IDYST/tbeucler/default/raw_data/ECMWF/ERA5_hourly_PL/SL/'
     else:
         way = '/work/FAC/FGSE/IDYST/tbeucler/default/raw_data/ECMWF/ERA5/SL/'
 
