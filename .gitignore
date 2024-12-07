@@ -1,3 +1,5 @@
 .DS_Store
 test/*
 data/log/*
+data/i10fg_dataset/*
+pre_processing/maps/servor_process/logs/*
