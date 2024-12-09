@@ -11,7 +11,7 @@ def open_monthly_nc(variable, year, months, way, level=0):
         datasets = [dataset.sel(level=level) for dataset in datasets]
     concated_datasets = xr.concat(datasets, dim='time')
     # reduce the size of the dataset by cutting the eu domain
-    concated_datasets = concated_datasets.sel(latitude=slice(70, 34))
+    concated_datasets = concated_datasets.sel(latitude=slice(72, 34))
     return concated_datasets
 
 def process_data(variable, year, way, level=0):
@@ -99,9 +99,14 @@ def to_tiff(variable, storm_dates, input_path, output_path, year, nb_hours, leve
     #dataset = xr.open_dataset('/work/FAC/FGSE/IDYST/tbeucler/default/fabien/repos/cleaner_version/data/i10fg_dataset/i10fg_dataset.nc')
     #dataset = dataset.sortby('time')
 
-    land_sea_mask = xr.open_dataset('/work/FAC/FGSE/IDYST/tbeucler/default/raw_data/ECMWF/ERA5/SL/land_sea_mask/ERA5_2021-1_land_sea_mask.nc')
+    #land_sea_mask = xr.open_dataset('/work/FAC/FGSE/IDYST/tbeucler/default/raw_data/ECMWF/ERA5/SL/land_sea_mask/ERA5_2021-1_land_sea_mask.nc')
     # remove the time dimension
-    land_sea_mask = land_sea_mask.sel(time='2021-01-01T00:00:00')
+    #land_sea_mask = land_sea_mask.sel(time='2021-01-01T00:00:00')
+
+    # load eu mask
+    eu_mask = xr.open_dataset('/work/FAC/FGSE/IDYST/tbeucler/default/fabien/repos/cleaner_version/pre_processing/maps/eu_final_raster.tif')
+    # rename the x and y dimensions to latitude and longitude
+    eu_mask = eu_mask.rename({'x': 'longitude', 'y': 'latitude'})
 
     print(f'Processing data for year {year}...')
 
@@ -158,8 +163,9 @@ def to_tiff(variable, storm_dates, input_path, output_path, year, nb_hours, leve
         #global_first_storm_max_eu = global_first_storm_max.roll(longitude=180, roll_coords='longitude').sel(latitude=slice(71, 33), longitude=slice(338, 40))
         #global_first_storm_max_eu = global_first_storm_max_eu.roll(longitude=90, roll_coords='longitude')
 
-        land_wind = global_first_storm_max.where(land_sea_mask['lsm'] >= 0.5)
-        land_wind = land_wind.assign_coords(time=time_landfall)
+        #land_wind = global_first_storm_max.where(land_sea_mask['lsm'] >= 0.5)
+        #land_wind = land_wind.assign_coords(time=time_landfall)
+        land_wind = global_first_storm_max.assign_coords(time=time_landfall)
 
         try:
             storm_name_value = storm_dates['storm_name'][index]
@@ -176,14 +182,18 @@ def to_tiff(variable, storm_dates, input_path, output_path, year, nb_hours, leve
         # Step 2: Sort the dataset by longitude to ensure it's in the right order
         sorted_data = land_wind.sortby('longitude')
 
-        sorted_data_eu = sorted_data.sel(latitude=slice(71, 33), longitude=slice(-12, 40))
+        sorted_data_eu = sorted_data.where(eu_mask['band_data'] == 1)
+        #sorted_data_eu = sorted_data.sel(latitude=slice(72, 33))
         sorted_data_eu = sorted_data_eu.assign_coords(time=time_landfall)
 
-        # setting the projection
-        sorted_data_eu = sorted_data_eu.rio.write_crs("EPSG:4326")# sorted_data.rio.write_crs("EPSG:4326")
+        # reorder the dimensions to band, latitude, longitude
+        sorted_data_eu_cleaned = sorted_data_eu['i10fg'].transpose('band', 'latitude', 'longitude')
 
-        sorted_data_reprojected = sorted_data_eu.rio.reproject(
-            sorted_data_eu.rio.crs,
+        # setting the projection
+        sorted_data_eu_cleaned = sorted_data_eu_cleaned.rio.write_crs("EPSG:4326")# sorted_data.rio.write_crs("EPSG:4326")
+
+        sorted_data_reprojected = sorted_data_eu_cleaned.rio.reproject(
+            sorted_data_eu_cleaned.rio.crs,
             resolution=0.25  # Setting the desired pixel size
         )
         print(f'Saving raster for storm {storm_name}...')
