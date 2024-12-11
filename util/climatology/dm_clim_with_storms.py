@@ -16,7 +16,7 @@ import data_process
 
 target_month = int(sys.argv[1])
 target_day = int(sys.argv[2])
-# Load time series dataset
+# Load time series dataset, which contains the landfall date of each storm (though the name of the column hasn't been not well chosen)
 dates = pd.read_csv('/work/FAC/FGSE/IDYST/tbeucler/default/fabien/repos/cleaner_version/data/time_series_1h_EU/instantaneous_10m_wind_gust/instantaneous_10m_wind_gust_max.csv')['start_date']
 
 # Load and preprocess the raster dataset
@@ -31,7 +31,7 @@ storm_month_day_year = [[date.month, date.day, date.year] for date in storm_date
 ifg = '/work/FAC/FGSE/IDYST/tbeucler/default/raw_data/ECMWF/ERA5/SL/instantaneous_10m_wind_gust/'
 
 # Date specification
-year = np.arange(1990,2021,1)
+year = np.arange(1990,2022,1)
 
 # Define special exclusions for specific years based on month and day
 exclusions = {
