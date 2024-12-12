@@ -9,10 +9,16 @@ import os
 import pandas as pd
 
 # Add the path to the custom library
-custom_library_path = os.path.abspath('/work/FAC/FGSE/IDYST/tbeucler/default/freddy0218/fabienVED')
+custom_library_path = os.path.abspath('/work/FAC/FGSE/IDYST/tbeucler/default/fabien/repos/cleaner_version/util/climatology/')
 sys.path.append(custom_library_path)
 
-import data_process
+import parse_and_daily
+from custom_pickle import save_to_pickle
+
+path_pickle = '/work/FAC/FGSE/IDYST/tbeucler/default/fabien/repos/cleaner_version/util/climatology/custom_pickle.py'
+sys.path.append(path_pickle)
+
+from custom_pickle import save_to_pickle
 
 target_month = int(sys.argv[1])
 target_day = int(sys.argv[2])
@@ -80,7 +86,7 @@ for yearz in tqdm(yearin):
         i10fg = xr.open_dataset(glob.glob(i10fgpath)[0])
 
         # Parse date indices
-        first_true_index, last_true_index = data_process.parse_date_and_output_list(i10fg, month, day)
+        first_true_index, last_true_index = parse_and_daily.parse_date_and_output_list(i10fg, month, day)
 
         # Preprocess dataset
         i10fg['longitude'] = ((i10fg['longitude'] + 180) % 360) - 180
@@ -90,15 +96,18 @@ for yearz in tqdm(yearin):
 
         # Calculate maximum wind speed
         max_wind_europe = i10fg_europe_date.max(dim='time')
-        max_winds_europe.append(max_wind_europe)
+        dataset_cut = max_wind_europe.where(eu_final_raster['band_data'] == 1)
+        max_winds_europe.append(dataset_cut)
 
         del i10fg, i10fg_europe
         gc.collect()
 
 # Combine and save results
-combined_max = xr.concat(max_winds_europe, dim="time").max('time')
-dataset_cut = combined_max.where(eu_final_raster['band_data'] == 1).rio.write_crs("EPSG:4326").squeeze().drop_vars('spatial_ref')
+#combined_max = xr.concat(max_winds_europe, dim="time").max('time')
+#dataset_cut = combined_max.where(eu_final_raster['band_data'] == 1).rio.write_crs("EPSG:4326").squeeze().drop_vars('spatial_ref')
 
-output_path = f"/work/FAC/FGSE/IDYST/tbeucler/default/fabien/repos/cleaner_version/data/climatology/daily_without_storms/climatology_europe_{target_month}_{target_day}.tif"
+output_path = f"/work/FAC/FGSE/IDYST/tbeucler/default/fabien/repos/cleaner_version/data/climatology/daily_without_storms/climatology_europe_{target_month}_{target_day}.pkl"
 #output_path = f"test/climatology_europe_{target_month}_{target_day}.tif"
-dataset_cut.rio.to_raster(output_path)
+#dataset_cut.rio.to_raster(output_path)
+
+save_to_pickle(max_winds_europe, output_path)

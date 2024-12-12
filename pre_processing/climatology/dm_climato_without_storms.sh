@@ -3,7 +3,7 @@
 #SBATCH --mail-type END
 #SBATCH --mail-user fabien.augsburger@unil.ch
 #SBATCH --chdir /work/FAC/FGSE/IDYST/tbeucler/default/fabien/repos/cleaner_version/data/climatology
-#SBATCH --job-name dm_clim_storms
+#SBATCH --job-name dm_clim_no_storms
 #SBATCH --output /work/FAC/FGSE/IDYST/tbeucler/default/fabien/repos/cleaner_version/pre_processing/climatology/log/con/con-%A_%a.out
 #SBATCH --error /work/FAC/FGSE/IDYST/tbeucler/default/fabien/repos/cleaner_version/pre_processing/climatology/log/error/err-%A_%a.err
 #SBATCH --partition cpu
