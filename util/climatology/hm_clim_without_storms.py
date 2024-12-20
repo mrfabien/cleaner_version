@@ -9,10 +9,11 @@ import os
 import pandas as pd
 
 # Add the path to the custom library
-custom_library_path = os.path.abspath('/work/FAC/FGSE/IDYST/tbeucler/default/freddy0218/fabienVED')
+custom_library_path = os.path.abspath('/work/FAC/FGSE/IDYST/tbeucler/default/fabien/repos/cleaner_version/util/climatology/')
 sys.path.append(custom_library_path)
 
-import data_process
+import parse_and_daily
+from custom_pickle import save_to_pickle
 
 target_month = int(sys.argv[1])
 target_day = int(sys.argv[2])
@@ -80,7 +81,7 @@ for yearz in tqdm(yearin):
         i10fg = xr.open_dataset(glob.glob(i10fgpath)[0])
 
         # Parse date indices
-        first_true_index, last_true_index = data_process.parse_date_and_output_list(i10fg, month, day)
+        first_true_index, last_true_index = parse_and_daily.parse_date_and_output_list(i10fg, month, day)
 
         # Preprocess dataset
         i10fg['longitude'] = ((i10fg['longitude'] + 180) % 360) - 180
@@ -89,16 +90,18 @@ for yearz in tqdm(yearin):
         i10fg_europe_date = i10fg_europe.isel(time=slice(first_true_index, last_true_index + 1))
 
         # Calculate hourly maximum wind speeds and store in a list
-        hourly_data = i10fg_europe_date.groupby("time.hour").max(dim="time")
-        hourly_data_array.append(hourly_data)
+        hourly_data = i10fg_europe_date.groupby("time.hour")#.max(dim="time")
+        hourly_data_cut = hourly_data.where(eu_final_raster['band_data'] == 1)
+        hourly_data_array.append(hourly_data_cut)
 
         del i10fg, i10fg_europe
         gc.collect()
 
 # Combine and save all hourly data into a single NetCDF file
-combined_hourly_data = xr.concat(hourly_data_array, dim="year").max(dim="year")
-combined_hourly_data = combined_hourly_data.where(eu_final_raster['band_data'] == 1).rio.write_crs("EPSG:4326").squeeze()
+#combined_hourly_data = xr.concat(hourly_data_array, dim="year").max(dim="year")
+#combined_hourly_data = combined_hourly_data.where(eu_final_raster['band_data'] == 1).rio.write_crs("EPSG:4326").squeeze()
 
 # Save as NetCDF4 file
-output_path = f"/work/FAC/FGSE/IDYST/tbeucler/default/fabien/repos/cleaner_version/data/climatology/hourly_without_storms/climatology_europe_{target_month}_{target_day}.nc"
-combined_hourly_data.to_netcdf(output_path, format='NETCDF4')
+output_path = f"/work/FAC/FGSE/IDYST/tbeucler/default/fabien/repos/cleaner_version/data/climatology/hourly_without_storms/climatology_europe_{target_month}_{target_day}.pkl"
+#combined_hourly_data.to_netcdf(output_path, format='NETCDF4')
+save_to_pickle(hourly_data_array, output_path)

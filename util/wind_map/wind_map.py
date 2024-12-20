@@ -141,7 +141,8 @@ def to_tiff(variable, storm_dates, input_path, output_path, year, nb_hours, leve
         time_end = storm_dates['end_date'][index]
         # skip storms that don't land in EU, denoted as -1 in the landfall date
         if time_landfall == '-1':
-            return print(f'Storm that ended on {time_end} didn\'t land in EU')
+            print(f'Storm that ended on {time_end} didn\'t land in EU')
+            continue
 
         # Calculate time range for slicing
         if nb_hours is not None:

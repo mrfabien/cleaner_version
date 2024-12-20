@@ -17,6 +17,8 @@ from custom_pickle import save_to_pickle
 
 target_month = int(sys.argv[1])
 target_day = int(sys.argv[2])
+
+target_month_day = [(target_month, target_day)]
 # Load time series dataset, which contains the landfall date of each storm (though the name of the column hasn't been not well chosen)
 dates = pd.read_csv('/work/FAC/FGSE/IDYST/tbeucler/default/fabien/repos/cleaner_version/data/time_series_1h_EU/instantaneous_10m_wind_gust/instantaneous_10m_wind_gust_max.csv')['start_date']
 
@@ -72,7 +74,7 @@ yearin = np.setdiff1d(year, exclusions.get((target_month, target_day), []))
 
 max_winds_europe = []
 for yearz in tqdm(yearin):
-    for month, day in extended_days:
+    for month, day in target_month_day: #extended_days:
         # Skip non-leap years for Feb 29
         if month == 2 and day == 29 and (yearz % 4 != 0 or (yearz % 100 == 0 and yearz % 400 != 0)):
             continue
@@ -102,6 +104,7 @@ for yearz in tqdm(yearin):
 #combined_max = xr.concat(max_winds_europe, dim="time").max('time')
 #dataset_cut = combined_max.where(eu_final_raster['band_data'] == 1).rio.write_crs("EPSG:4326").squeeze().drop_vars('spatial_ref')
 
+output_path = f"/work/FAC/FGSE/IDYST/tbeucler/default/fabien/repos/cleaner_version/data/climatology/daily_with_storms/climatology_europe_{target_month}_{target_day}.pkl"
 #output_path = f"test/climatology_europe_{target_month}_{target_day}.tif"
 #dataset_cut.rio.to_raster(output_path)
 

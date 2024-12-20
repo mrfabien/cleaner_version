@@ -12,7 +12,7 @@
 #SBATCH --cpus-per-task 1
 #SBATCH --mem 64G
 #SBATCH --time 00:30:00
-#SBATCH --array=0-31
+#SBATCH --array=0-29
 
 module purge
 dcsrsoft use 20240303
@@ -30,7 +30,8 @@ id=${SLURM_ARRAY_TASK_ID}
 #nom_var=$(awk -v ArrayTaskID=${SLURM_ARRAY_TASK_ID} '$1==ArrayTaskID {print $2}' $config)
 
 # Extract the annee for the current $SLURM_ARRAY_TASK_ID
-annee=$(awk -v ArrayTaskID=${SLURM_ARRAY_TASK_ID} '$1==ArrayTaskID {print $1}' $config)
+annee=$(awk -v ArrayTaskID=${SLURM_ARRAY_TASK_ID} '$1==ArrayTaskID {print $2}' $config)
+hours=$(awk -v ArrayTaskID=${SLURM_ARRAY_TASK_ID} '$1==ArrayTaskID {print $3}' $config)
 
 # Extract the level for the current $SLURM_ARRAY_TASK_ID
 #level=$(awk -v ArrayTaskID=${SLURM_ARRAY_TASK_ID} '$1==ArrayTaskID {print $4}' $config)
@@ -42,7 +43,7 @@ annee=$(awk -v ArrayTaskID=${SLURM_ARRAY_TASK_ID} '$1==ArrayTaskID {print $1}' $
 
 # Execute the python script by looping from 0 to 95 (number of storms)
 
-python3 /work/FAC/FGSE/IDYST/tbeucler/default/fabien/repos/cleaner_version/pre_processing/maps/servor_process/map_creation_bash.py "$annee" # "$nom_var" "$annee" "$level"
+python3 /work/FAC/FGSE/IDYST/tbeucler/default/fabien/repos/cleaner_version/pre_processing/maps/servor_process/map_creation_bash.py "$annee" "$hours" # "$nom_var" "$annee" "$level"
 
 # Print to a file a message that includes the current $SLURM_ARRAY_TASK_ID, the same variable, and the year of the sample
 #echo "This is array task ${SLURM_ARRAY_TASK_ID}, the variable name is ${nom_var} and the year is ${annee}. Level is ${level}" >> /work/FAC/FGSE/IDYST/tbeucler/default/fabien/repos/curnagl/case_study/output_all.txt

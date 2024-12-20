@@ -41,6 +41,9 @@ def to_pca_components(path, variables, seed_number, threshold=0.98):
     stats = ['max','min','mean','std']
     # Load the data
     for var in variables['variables']:
+        if var == 'sea_surface_temperature':
+             print('sea_surface_temperature is not taken into account')
+             continue
         for stat in stats:
             var_name = f'{var}_{stat}'
             var_data = pd.read_csv(f'{path}/data/time_series_1h_non_EU/{var}/{var}_{stat}.csv')
@@ -57,17 +60,17 @@ def to_pca_components(path, variables, seed_number, threshold=0.98):
             var_validation = var_validation.drop(columns=['storm_index','Unnamed: 0'])
 
             # standardize the data by row
-            var_training = var_training.T
+            #var_training = var_training.T
             scaler = StandardScaler()
             scaler.fit(var_training)
             var_training_scaler = scaler.transform(var_training)
 
-            var_test = var_test.T
+            #var_test = var_test.T
             scaler = StandardScaler()
             scaler.fit(var_test)
             var_test_scaler = scaler.transform(var_test)
 
-            var_validation = var_validation.T
+            #var_validation = var_validation.T
             scaler = StandardScaler()
             scaler.fit(var_validation)
             var_validation_scaler = scaler.transform(var_validation)

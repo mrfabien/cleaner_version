@@ -39,7 +39,7 @@ nb_hours = 15
 '''if os.path.exists(f'{output_file}/storm_{index}.tiff'):
     print('Storm number', index+1,' at index ', index, ' already exists')
     sys.exit()'''
-print('Processing date', storm_dates['start_date'][index])
+#print('Processing date', storm_dates.loc['start_date'][index])
 wind_map.to_tiff(variable, storm_dates, input_path, output_file, index, nb_hours, level=0)
 
 # storm Xylia doesn't work, need to be done manually
