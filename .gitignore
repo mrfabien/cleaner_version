@@ -6,6 +6,5 @@ data/climatology/hourly_with_storms_extended/*
 data/climatology/hourly_without_storms_extended/*
 data/climatology/hourly_without_storms/*
 data/climatology/hourly_with_storms/*
-data/climatology/daily_winter_season/*
 pre_processing/maps/servor_process/logs/*
 pre_processing/climatology/log/*
