@@ -1,6 +1,23 @@
 import pandas as pd
 import xarray as xr
 import time_series
+import pickle
+
+def save_to_pickle(data,savepath):
+
+    with open(savepath, 'wb') as handle:
+
+        pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+    return None
+ 
+def depickle(savepath):
+
+    with open(savepath, 'rb') as handle:
+
+        b = pickle.load(handle)
+
+    return b
 
 def process_daily_climatology(file_path, cluster_data, name, lat_min=35, lat_max=75, lon_min=-10, lon_max=25):
     """

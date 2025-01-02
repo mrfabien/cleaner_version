@@ -12,7 +12,7 @@
 #SBATCH --cpus-per-task 1
 #SBATCH --mem 64G
 #SBATCH --time 00:30:00
-#SBATCH --array=0-114
+#SBATCH --array=0-185
 
 # Set your environment
 module purge
@@ -22,7 +22,7 @@ source ~/.bashrc
 conda activate /work/FAC/FGSE/IDYST/tbeucler/default/fabien/conda_env
 
 # Specify the path to the config file
-config=/work/FAC/FGSE/IDYST/tbeucler/default/fabien/repos/cleaner_version/pre_processing/climatology/config_climato.txt
+config=/work/FAC/FGSE/IDYST/tbeucler/default/fabien/repos/cleaner_version/pre_processing/climatology/config_climato_winter.txt
 # echo "SLURM_ARRAY_TASK_ID is :${SLURM_ARRAY_TASK_ID}" >> /work/FAC/FGSE/IDYST/tbeucler/default/fabien/repos/curnagl/case_study/output_test_all.txt
 
 # Extract the nom_var for the current $SLURM_ARRAY_TASK_ID

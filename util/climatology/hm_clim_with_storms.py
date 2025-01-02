@@ -17,17 +17,20 @@ from custom_pickle import save_to_pickle
 
 target_month = int(sys.argv[1])
 target_day = int(sys.argv[2])
+
+target_month_day = [(target_month, target_day)]
+
 # Load time series dataset, which contains the landfall date of each storm (though the name of the column hasn't been not well chosen)
-dates = pd.read_csv('/work/FAC/FGSE/IDYST/tbeucler/default/fabien/repos/cleaner_version/data/time_series_1h_EU/instantaneous_10m_wind_gust/instantaneous_10m_wind_gust_max.csv')['start_date']
+#dates = pd.read_csv('/work/FAC/FGSE/IDYST/tbeucler/default/fabien/repos/cleaner_version/data/time_series_1h_EU/instantaneous_10m_wind_gust/instantaneous_10m_wind_gust_max.csv')['start_date']
 
 # Load and preprocess the raster dataset
 eu_final_raster = xr.open_dataset('/work/FAC/FGSE/IDYST/tbeucler/default/fabien/repos/cleaner_version/pre_processing/maps/eu_final_raster.tif', engine='rasterio').rename({'x': 'longitude', 'y': 'latitude'})
 
 # Parse storm dates
-storm_dates = [datetime.strptime(date, '%Y-%m-%dT%H:%M:%S') for date in dates]
+#storm_dates = [datetime.strptime(date, '%Y-%m-%dT%H:%M:%S') for date in dates]
 
 # Extract unique month-day combinations with landfall years
-storm_month_day_year = [[date.month, date.day, date.year] for date in storm_dates]
+#storm_month_day_year = [[date.month, date.day, date.year] for date in storm_dates]
 
 ifg = '/work/FAC/FGSE/IDYST/tbeucler/default/raw_data/ECMWF/ERA5/SL/instantaneous_10m_wind_gust/'
 
@@ -55,7 +58,7 @@ def get_extended_days(target_month, target_day):
     return extended_days
 
 # Get the extended range of days
-extended_days = get_extended_days(target_month, target_day)
+#extended_days = get_extended_days(target_month, target_day)
 
 '''# Collect landfall years for all days in the extended range
 landfall_years = []
@@ -72,7 +75,7 @@ yearin = np.setdiff1d(year, exclusions.get((target_month, target_day), []))
 
 hourly_data_array = []
 for yearz in tqdm(yearin):
-    for month, day in extended_days:
+    for month, day in target_month_day:# extended_days:
         # Skip non-leap years for Feb 29
         if month == 2 and day == 29 and (yearz % 4 != 0 or (yearz % 100 == 0 and yearz % 400 != 0)):
             continue
@@ -103,6 +106,6 @@ for yearz in tqdm(yearin):
 #ombined_hourly_data = hourly_data_array.where(eu_final_raster['band_data'] == 1)#.rio.write_crs("EPSG:4326").squeeze()
 
 # Save as NetCDF4 file
-output_path = f"/work/FAC/FGSE/IDYST/tbeucler/default/fabien/repos/cleaner_version/data/climatology/hourly_with_storms/climatology_europe_{target_month}_{target_day}.pkl"
+output_path = f"/work/FAC/FGSE/IDYST/tbeucler/default/fabien/repos/cleaner_version/data/climatology/hourly_winter_season/climatology_europe_winter_{target_month}_{target_day}.pkl"
 #combined_hourly_data.to_netcdf(output_path)
 save_to_pickle(hourly_data_array, output_path)
