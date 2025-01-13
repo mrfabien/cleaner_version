@@ -45,6 +45,64 @@ def open_and_concatenate(year, variable, months, way, level=0):
         dim = 'time'
     return xr.concat(datasets, dim=dim), dim
 
+# for u and v components of wind
+def open_and_concatenate_wind(year, u_component, v_component, months, way, level=0):
+    try:
+        datasets_u = [xr.open_dataset(f'{way}{u_component}/ERA5_{year}-{month}_{u_component}.nc') for month in months]
+        datasets_v = [xr.open_dataset(f'{way}{v_component}/ERA5_{year}-{month}_{v_component}.nc') for month in months]
+    except:
+        datasets_u = [xr.open_dataset(f'{way}{u_component}/ERA5_{year}_{month:02d}_{u_component}.nc') for month in months]
+        datasets_v = [xr.open_dataset(f'{way}{v_component}/ERA5_{year}_{month:02d}_{v_component}.nc') for month in months]
+
+    if u_component == '10m_u_component_of_wind':
+        u_component = '10u'
+        v_component = '10v'
+    elif u_component == '100m_u_component_of_wind':
+        u_component = '100u'
+        v_component = '100v'
+
+    # concatenate u and v components of wind
+    datasets = [xr.merge([dataset_u, dataset_v]) for dataset_u, dataset_v in zip(datasets_u, datasets_v)]
+
+    del datasets_u, datasets_v
+    # calculate the magnitude of the wind
+    try:
+        datasets = [np.sqrt(dataset[u_component]**2 + dataset[v_component]**2) for dataset in datasets]
+    except:
+        if u_component == '10u':
+            u_component = 'u10'
+            v_component = 'v10'
+        elif u_component == '100u':
+            u_component = 'u100'
+            v_component = 'v100'
+        datasets = [np.sqrt(dataset[u_component]**2 + dataset[v_component]**2) for dataset in datasets]
+
+    # add the magnitude of the wind to the datasets
+    if u_component == '10u' or 'u10':
+        datasets = [dataset.to_dataset(name='10m_magnitude_of_wind') for dataset in datasets]
+    elif u_component == '100u' or 'u100':
+        datasets = [dataset.to_dataset(name='100m_magnitude_of_wind') for dataset in datasets]
+    for i, dataset in enumerate(datasets):
+        # Get the list of coordinates in the dataset
+        keys = list(dataset.coords.keys())
+        
+        # Check if the specific coordinates are present
+        if 'valid_time' in keys:
+            #print(f"Dataset {i}: Renaming 'valid_time' to 'time'")
+            
+            # Rename 'valid_time' to 'time'
+            datasets[i] = dataset.rename({'valid_time': 'time'})
+            # Remove expver coordinate
+            if 'expver' in keys:
+                #print(f"Dataset {i}: Removing 'expver' coordinate")
+                datasets[i] = datasets[i].drop_vars('expver')
+                datasets[i] = datasets[i].drop_vars('number')
+        else:
+            #print(f"Dataset {i}: 'valid_time' not found, skipping")
+            pass
+    dim = 'time'
+    return xr.concat(datasets, dim=dim), dim
+
 
 # Define a function to calculate statistics
 def calculate_statistics(data_array):
@@ -95,19 +153,42 @@ def process_data(variable, year, level=0):
     else:
         way = '/work/FAC/FGSE/IDYST/tbeucler/default/raw_data/ECMWF/ERA5/SL/'
 
-    # Open and concatenate datasets
-    if year == 1990:
-        dataset_act, dim = open_and_concatenate(str(year), variable, month_next, way, level)
-        dataset_next, dim = open_and_concatenate(str(year_next), variable, month_next, way, level)
-        dataset = xr.concat([dataset_act, dataset_next], dim=dim)
-        dataset = dataset.chunk({dim: 10})
-    elif year == 2021:
-        dataset, dim = open_and_concatenate(str(year), variable, month_next, way, level)
+    if variable == '10m_u_component_of_wind' or variable == '100m_u_component_of_wind':
+        if variable == '10m_u_component_of_wind':
+            u_var = '10m_u_component_of_wind'
+            v_var = '10m_v_component_of_wind'
+            variable = '10m_magnitude_of_wind'
+        else:
+            u_var = '100m_u_component_of_wind'
+            v_var = '100m_v_component_of_wind'
+            variable = '100m_magnitude_of_wind'
+        if year == 1990:
+            dataset_act, dim = open_and_concatenate_wind(str(year), u_var, v_var, month_next, way, level)
+            dataset_next, dim = open_and_concatenate_wind(str(year_next), u_var, v_var, month_next, way, level)
+            dataset = xr.concat([dataset_act, dataset_next], dim=dim)
+            dataset = dataset.chunk({dim: 10})
+        elif year == 2021:
+            dataset, dim = open_and_concatenate_wind(str(year), u_var, v_var, month_next, way, level)
+        else:
+            dataset_act, dim = open_and_concatenate_wind(str(year), u_var, v_var, month_act, way, level)
+            dataset_next, dim = open_and_concatenate_wind(str(year_next), u_var, v_var, month_next, way, level)
+            dataset = xr.concat([dataset_act, dataset_next], dim=dim)
+            dataset = dataset.chunk({dim: 10})
+
     else:
-        dataset_act, dim = open_and_concatenate(str(year), variable, month_act, way, level)
-        dataset_next, dim = open_and_concatenate(str(year_next), variable, month_next, way, level)
-        dataset = xr.concat([dataset_act, dataset_next], dim=dim)
-        dataset = dataset.chunk({dim: 10})
+        # Open and concatenate datasets
+        if year == 1990:
+            dataset_act, dim = open_and_concatenate(str(year), variable, month_next, way, level)
+            dataset_next, dim = open_and_concatenate(str(year_next), variable, month_next, way, level)
+            dataset = xr.concat([dataset_act, dataset_next], dim=dim)
+            dataset = dataset.chunk({dim: 10})
+        elif year == 2021:
+            dataset, dim = open_and_concatenate(str(year), variable, month_next, way, level)
+        else:
+            dataset_act, dim = open_and_concatenate(str(year), variable, month_act, way, level)
+            dataset_next, dim = open_and_concatenate(str(year_next), variable, month_next, way, level)
+            dataset = xr.concat([dataset_act, dataset_next], dim=dim)
+            dataset = dataset.chunk({dim: 10})
 
     # Determine the specific variable to extract
     specific_var = next(var for var in dataset.variables if var not in ['longitude', 'latitude', 'time', 'level','number', 'valid_time', 'expver'])
