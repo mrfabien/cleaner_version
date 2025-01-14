@@ -65,23 +65,47 @@ def open_and_concatenate_wind(year, u_component, v_component, months, way, level
     datasets = [xr.merge([dataset_u, dataset_v]) for dataset_u, dataset_v in zip(datasets_u, datasets_v)]
 
     del datasets_u, datasets_v
-    # calculate the magnitude of the wind
-    try:
-        datasets = [np.sqrt(dataset[u_component]**2 + dataset[v_component]**2) for dataset in datasets]
-    except:
-        if u_component == '10u':
-            u_component = 'u10'
-            v_component = 'v10'
-        elif u_component == '100u':
-            u_component = 'u100'
-            v_component = 'v100'
-        datasets = [np.sqrt(dataset[u_component]**2 + dataset[v_component]**2) for dataset in datasets]
+    if level == 1:
+        # calculate the magnitude of the wind
+        try:
+            datasets = [np.sqrt(dataset[u_component]**2 + dataset[v_component]**2) for dataset in datasets]
+        except:
+            if u_component == '10u':
+                u_component = 'u10'
+                v_component = 'v10'
+            elif u_component == '100u':
+                u_component = 'u100'
+                v_component = 'v100'
+            datasets = [np.sqrt(dataset[u_component]**2 + dataset[v_component]**2) for dataset in datasets]
 
-    # add the magnitude of the wind to the datasets
-    if u_component == '10u' or 'u10':
-        datasets = [dataset.to_dataset(name='10m_magnitude_of_wind') for dataset in datasets]
-    elif u_component == '100u' or 'u100':
-        datasets = [dataset.to_dataset(name='100m_magnitude_of_wind') for dataset in datasets]
+        # add the magnitude of the wind to the datasets
+        if u_component == '10u' or 'u10':
+            datasets = [dataset.to_dataset(name='10m_magnitude_of_wind') for dataset in datasets]
+        elif u_component == '100u' or 'u100':
+            datasets = [dataset.to_dataset(name='100m_magnitude_of_wind') for dataset in datasets]
+    elif level == 2:
+        # Calculate wind direction (in degrees)
+        # calculate the magnitude of the wind
+        try:
+            datasets = [np.degrees(np.arctan2(-dataset[u_component], -dataset[v_component])) % 360 for dataset in datasets]
+        except:
+            if u_component == '10u':
+                u_component = 'u10'
+                v_component = 'v10'
+            elif u_component == '100u':
+                u_component = 'u100'
+                v_component = 'v100'
+            datasets = [np.degrees(np.arctan2(-dataset[u_component], -dataset[v_component])) % 360 for dataset in datasets]
+
+        # add the magnitude of the wind to the datasets
+        if u_component == '10u' or 'u10':
+            datasets = [dataset.to_dataset(name='10m_orientation_of_wind') for dataset in datasets]
+        elif u_component == '100u' or 'u100':
+            datasets = [dataset.to_dataset(name='100m_orientation_of_wind') for dataset in datasets]
+    
+    else:
+        print('Level must be 1 or 2, for magnitude or orientation of wind, respectively')
+
     for i, dataset in enumerate(datasets):
         # Get the list of coordinates in the dataset
         keys = list(dataset.coords.keys())
@@ -157,11 +181,18 @@ def process_data(variable, year, level=0):
         if variable == '10m_u_component_of_wind':
             u_var = '10m_u_component_of_wind'
             v_var = '10m_v_component_of_wind'
-            variable = '10m_magnitude_of_wind'
+            if level == 1:
+                variable = '10m_magnitude_of_wind'
+            else:
+                variable = '10m_orientation_of_wind'
         else:
             u_var = '100m_u_component_of_wind'
             v_var = '100m_v_component_of_wind'
-            variable = '100m_magnitude_of_wind'
+            if level == 1:
+                variable = '100m_magnitude_of_wind'
+            else:
+                variable = '100m_orientation_of_wind'
+
         if year == 1990:
             dataset_act, dim = open_and_concatenate_wind(str(year), u_var, v_var, month_next, way, level)
             dataset_next, dim = open_and_concatenate_wind(str(year_next), u_var, v_var, month_next, way, level)
@@ -290,7 +321,10 @@ def process_data(variable, year, level=0):
             directory = f'{dataset_path}/{variable}/storm_{storm_number}'
             if not os.path.exists(directory):
                 os.makedirs(directory)
-            pd.DataFrame(stats[key]).to_csv(f'{directory}/{key}_{storm_number}_{level}.csv')
+            if variable == '10m_magnitude_of_wind' or variable == '100m_magnitude_of_wind' or variable == '10m_orientation_of_wind' or variable == '100m_orientation_of_wind':
+                pd.DataFrame(stats[key]).to_csv(f'{directory}/{key}_{storm_number}_0.csv')
+            else:
+                pd.DataFrame(stats[key]).to_csv(f'{directory}/{key}_{storm_number}_{level}.csv')
 
         # Log the processing details
         log_processing(variable, year, level, storm_number)
