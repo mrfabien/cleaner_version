@@ -1,0 +1,8 @@
+selected_pc,val_rmse, seed
+mean_top_net_long_wave_radiation_flux_std_PC9, 1.326135643881517, 0
+2m_dewpoint_temperature_max_PC11, 1.316756247171401, 0
+2m_temperature_std_PC6, 1.3102959084722106, 0
+K_index_max_PC3, 1.307242133702916, 0
+10m_v_component_of_wind_max_PC9, 1.3067771641821166, 0
+mean_sea_level_pressure_mean_PC4, 1.3063823692533671, 0
+mean_sea_level_pressure_min_PC10, 1.3031657793849616, 0
