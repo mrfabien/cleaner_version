@@ -1,8 +1,22 @@
-selected_pc,val_rmse, seed
-mean_top_net_long_wave_radiation_flux_std_PC9, 1.326135643881517, 0
-2m_dewpoint_temperature_max_PC11, 1.316756247171401, 0
-2m_temperature_std_PC6, 1.3102959084722106, 0
-K_index_max_PC3, 1.307242133702916, 0
-10m_v_component_of_wind_max_PC9, 1.3067771641821166, 0
-mean_sea_level_pressure_mean_PC4, 1.3063823692533671, 0
-mean_sea_level_pressure_min_PC10, 1.3031657793849616, 0
+selected_pc,rmse_val
+relative_humidity_850_mean_PC11,1.2550392845893388
+relative_humidity_900_max_PC1,1.241884272191761
+relative_humidity_30_min_PC8,1.2282240397342457
+relative_humidity_850_std_PC8,1.2182808263700438
+relative_humidity_950_min_PC3,1.2075029518397966
+k_index_mean_PC8,1.1994924244587732
+relative_humidity_925_mean_PC8,1.189351413217784
+relative_humidity_250_max_PC5,1.18257838346893
+relative_humidity_100_mean_PC8,1.1782313109031135
+geopotential_1000_mean_PC6,1.1719048086484978
+relative_humidity_1000_mean_PC11,1.1658931282293612
+surface_sensible_heat_flux_max_PC4,1.1617247904733603
+relative_humidity_200_max_PC10,1.1558462729732213
+relative_humidity_70_mean_PC9,1.1512837436548977
+surface_latent_heat_flux_min_PC10,1.1486520439422157
+relative_humidity_300_max_PC9,1.1447862494888636
+relative_humidity_300_min_PC7,1.1415092475416828
+relative_humidity_850_min_PC6,1.1387473989288415
+mean_vertically_integrated_moisture_divergence_min_PC9,1.1371807950677912
+geopotential_1000_max_PC3,1.1360569858118772
+total_totals_index_max_PC5,1.1347784644147845
